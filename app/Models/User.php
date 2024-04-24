@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -20,7 +20,6 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'password',
     ];
 
     /**
@@ -31,6 +30,13 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        '2fa_code',
+        '2fa_code_at',
+        'email_verified',
+        'email_verified_at',
+        'first_login_attempt',
+        'created_at',
+        'updated_at'
     ];
 
     /**
