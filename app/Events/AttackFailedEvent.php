@@ -32,11 +32,11 @@ class AttackFailedEvent implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new channel('attackfailed');
+        return new channel('ataquefallido');
     }
 
     public function broadcastAs()
     {
-        return 'attackfailed';
+        return 'ataquefallido';
     }
 }
