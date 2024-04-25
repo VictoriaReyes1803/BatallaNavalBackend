@@ -45,6 +45,7 @@ Route::prefix('game')->group(function(){
     Route::post('/attack/failed', [GameController::class, 'attackFailed']);
 });
 
+
 Route::prefix('/user')->group(function () {
 
     Route::post('/register', [UserController::class, 'register']);
