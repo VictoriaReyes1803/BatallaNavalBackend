@@ -262,7 +262,7 @@ class GameController extends Controller
         if ($validator->fails()) {
             return response()->json(["errors" => $validator->errors()], 400);
         }
-        //0                //1                 //2                   //3
+                                            //0                //1                 //2                   //3
         event(new AttackSuccessEvent([$request->hited, $request->turn, $request->cell, $request->playerWhoAttacked]));
 
         return response()->json([
