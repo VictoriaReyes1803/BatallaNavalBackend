@@ -31,7 +31,7 @@ class EmailVerificationController extends Controller
 
          $userToken->delete();
 
-        $user->is_verified = true;
+        $user->email_verified = true;
         $user->email_verified_at = now();
         $user->save();
 

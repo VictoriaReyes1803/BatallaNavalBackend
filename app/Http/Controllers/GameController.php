@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-
 use App\Events\AttackEvent;
 use App\Events\AttackFailedEvent;
 use App\Events\AttackSuccessEvent;
@@ -185,7 +184,6 @@ class GameController extends Controller
         }
 
         $gameId = $request->gameId;
-        //$player_id = Auth::user()->id;
 
         $game = game::find($gameId);
         if ($game->status != 'queue'){
