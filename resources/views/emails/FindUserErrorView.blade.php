@@ -15,29 +15,30 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #fff;
+            background-color: #000;
+            color: #ff0000;
         }
         .container {
             text-align: center;
             padding: 20px;
-            background-color: #fff;
+            background-color: #000;
+            color: #ff0000;
             border-radius: 8px;
-            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+            box-shadow: 0px 0px 10px rgba(255,0,0,0.1);
         }
         h1 {
-            color: #000000;
             margin-bottom: 10px;
+            font-size: 24px;
         }
         p {
-            color: #000000;
-            font-size: 1.2em;
+            font-size: 18px;
         }
     </style>
 </head>
 <body>
 <div class="container">
     <h1>Error!</h1>
-    <p>User could not be found.</p>
+    <p>Usuario no pudo ser encontrado.</p>
 </div>
 </body>
 </html>

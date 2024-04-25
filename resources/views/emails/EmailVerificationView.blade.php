@@ -11,40 +11,36 @@
             font-family: 'Open Sans', sans-serif;
         }
 
-
         body {
-            background-color: #fff;
-            color: #000000;
+            background-color: #000;
+            color: #ff0000;
             line-height: 1.6;
         }
-
 
         .container {
             width: 80%;
             margin: 50px auto;
             text-align: center;
-            background-color: #fff;
+            background-color: #000;
+            color: #ff0000;
             padding: 20px;
             border-radius: 15px;
-            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+            box-shadow: 0px 0px 10px rgba(255,0,0,0.1);
         }
 
-
         h2 {
-            color: #000000;
+            color: #ff0000;
             padding: 20px 0;
         }
 
-
         p {
-            color: #333;
+            color: #ff0000;
         }
-
 
         a {
             display: inline-block;
-            color: #fff;
-            background-color: #000000;
+            color: #ff0000;
+            background-color: #000;
             padding: 10px 20px;
             margin: 20px 0;
             border-radius: 5px;
@@ -54,15 +50,15 @@
         }
 
         a:hover {
-            background-color: #000000;
+            background-color: #ff0000;
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <h2>Exito!</h2>
+    <h2>Éxito!</h2>
     <p>Hola {{$user['nombre']}},</p>
-    <p>Porfavor haz click aqui para verificar tu cuenta:D.</p>
+    <p>Por favor haz clic <a href="{{$url}}" style="color: #ff0000;">aquí</a> para verificar tu cuenta :D.</p>
     <a href="{{$url}}">Verificar</a>
 </div>
 </body>

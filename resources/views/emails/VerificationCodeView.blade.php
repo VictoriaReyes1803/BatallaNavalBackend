@@ -8,8 +8,8 @@
     <style>
         body {
             font-family: 'Open Sans', sans-serif;
-            background-color: #333;
-            color: #fff;
+            background-color: #000;
+            color: #ff0000;
             margin: 0;
             padding: 0;
             display: flex;
@@ -19,29 +19,29 @@
         }
         .container {
             text-align: center;
-            background: #fff;
+            background: #000;
             padding: 40px;
             border-radius: 10px;
-            box-shadow: 0px 0px 20px rgba(0,0.5,0.5,0.2);
+            box-shadow: 0px 0px 20px rgba(255,0,0,0.2);
+        }
+        h1, h2, p {
+            color: #ff0000; 
+            margin-bottom: 20px;
+            font-weight: bold;
         }
         h1 {
-            color: #000000; 
             font-size: 48px; 
-            margin-bottom: 20px;
         }
         h2 {
-            color: #000000;
-            margin-bottom: 10px;
-            font-size: 48px; 
+            font-size: 36px;
         }
         p {
-            color: #000000;
-            margin-bottom: 5px;
+            font-size: 18px;
         }
         a {
             display: inline-block;
-            color: #000000;
-            background-color: rgba(0, 0, 0, 0.5);
+            color: #ff0000;
+            background-color: #000;
             padding: 15px 30px;
             margin: 20px 0;
             border-radius: 5px;
@@ -49,8 +49,8 @@
             font-weight: bold;
         }
         .code {
+            font-size: 36px;
             letter-spacing: 8px;
-
         }
 
         .logo {
@@ -63,9 +63,8 @@
 <body>
 <div class="container">
     <h2>Batalla Naval</h2>
-    <p>Porvafor verifica el codigo</p>
-    <p>Tienes solo 5 minutos de experación.</p>
-    <a><h1 class="code" >{{$code}}</h1></a>
+    <p>Por favor verifica el código:</p>
+    <a><h1 class="code">{{$code}}</h1></a>
 </div>
 </body>
 </html>
