@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 use App\Events\AttackEvent;
 use App\Events\AttackFailedEvent;
 use App\Events\AttackSuccessEvent;
+use App\Events\StartGame;
 use App\Events\TestEvent;
 use App\Events\NotifyEvent;
 use App\Events\AlertWinner;
@@ -99,7 +100,7 @@ class GameController extends Controller
         $random_game->save();
 
         try {
-            event(new TestEvent(['gameId' => $random_game->id, 'players' => [$random_game->player1_id, $random_game->player2_id]]));
+            event(new StartGame(['gameId' => $random_game->id, 'players' => [$random_game->player1_id, $random_game->player2_id]]));
             Log::info('El evento TestEvent se ha enviado correctamente.');
         } catch (\Exception $e) {
             Log::error('Error al emitir el evento TestEvent: ' . $e->getMessage());
@@ -236,7 +237,7 @@ class GameController extends Controller
         }
 
         $playerWhoAttacked = Auth::user()->id;
-        //0                //1                 //2                   //3
+                                    //0                //1                 //2                   //3
         event(new AttackEvent([$request->gameId, $request->cell, $request->playerAttacked, $playerWhoAttacked]));
 
         return response()->json([
@@ -287,7 +288,7 @@ class GameController extends Controller
         if ($validator->fails()) {
             return response()->json(["errors" => $validator->errors()], 400);
         }
-        //0                //1                 //2                   //3
+                                        //0                //1                 //2                   //3
         event(new AttackFailedEvent([$request->hited, $request->turn, $request->cell, $request->playerWhoAttacked]));
 
         return response()->json([

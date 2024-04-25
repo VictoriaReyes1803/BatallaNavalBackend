@@ -27,11 +27,11 @@ class AlertWinner implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new channel('winner');
+        return new channel('ganador');
     }
 
     public function broadcastAs()
     {
-        return 'winner';
+        return 'ganador';
     }
 }

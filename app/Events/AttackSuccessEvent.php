@@ -32,11 +32,11 @@ class AttackSuccessEvent implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new channel('attacksuccess');
+        return new channel('ataque');
     }
 
     public function broadcastAs()
     {
-        return 'attacksuccess';
+        return 'ataque';
     }
 }

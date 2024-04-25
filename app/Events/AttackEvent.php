@@ -29,11 +29,11 @@ class AttackEvent implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new channel('attack');
+        return new channel('atacar');
     }
 
     public function broadcastAs()
     {
-        return 'attack';
+        return 'atacar';
     }
 }
