@@ -48,7 +48,7 @@ class UserController extends Controller
         }catch (\Exception $e){
             Log::critical($e);
             $user->delete();
-            return response()->json(["success" => false, "message" => "Internal error."], 500);
+            return response()->json(["success" => false, "message" => "Internal error email."], 500);
         }
 
         return response()->json(["success" => true, "message" => "Registered correctly "], 201);

@@ -13,8 +13,8 @@
 
 
         body {
-            background-color: #e6f2ff;
-            color: #333;
+            background-color: #fff;
+            color: #000000;
             line-height: 1.6;
         }
 
@@ -31,7 +31,7 @@
 
 
         h2 {
-            color: #00264d;
+            color: #000000;
             padding: 20px 0;
         }
 
@@ -44,7 +44,7 @@
         a {
             display: inline-block;
             color: #fff;
-            background-color: #004080;
+            background-color: #000000;
             padding: 10px 20px;
             margin: 20px 0;
             border-radius: 5px;
@@ -54,16 +54,16 @@
         }
 
         a:hover {
-            background-color: #0059b3;
+            background-color: #000000;
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <h2>Welcome!</h2>
-    <p>Hello {{$user['nombre']}},</p>
-    <p>Please click the link below to verify your email and activate your account.</p>
-    <a href="{{$url}}">Verify Email</a>
+    <h2>Exito!</h2>
+    <p>Hola {{$user['nombre']}},</p>
+    <p>Porfavor haz click aqui para verificar tu cuenta:D.</p>
+    <a href="{{$url}}">Verificar</a>
 </div>
 </body>
 </html>

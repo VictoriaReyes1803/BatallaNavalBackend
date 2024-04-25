@@ -19,23 +19,23 @@
         }
         .container {
             text-align: center;
-            background: linear-gradient(#000000, #000000);
+            background: #fff;
             padding: 40px;
             border-radius: 10px;
             box-shadow: 0px 0px 20px rgba(0,0.5,0.5,0.2);
         }
         h1 {
-            color: #fff; 
+            color: #000000; 
             font-size: 48px; 
             margin-bottom: 20px;
         }
         h2 {
-            color: #fff;
+            color: #000000;
             margin-bottom: 10px;
             font-size: 48px; 
         }
         p {
-            color: #fff;
+            color: #000000;
             margin-bottom: 5px;
         }
         a {

@@ -45,7 +45,7 @@
 <body>
 <div class="container">
     <h1>Error!</h1>
-    <p>Your account has already been activated.</p>
+    <p>Tu cuenta ya ha sido Activada.</p>
 </div>
 </body>
 </html>

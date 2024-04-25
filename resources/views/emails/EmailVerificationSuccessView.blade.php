@@ -18,7 +18,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #e6f2ff;
+            background-color: #fff;
         }
 
 
@@ -32,22 +32,22 @@
 
 
         h1 {
-            color: #004080;
+            color: #000000;
             margin-bottom: 10px;
             font-weight: 700;
         }
 
 
         p {
-            color: #333;
+            color: #000000;
             font-size: 1.2em;
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>¡Successful Register!</h1>
-    <p>Your account has been activated successfully.</p>
+    <h1>Registro Exitoso</h1>
+    <p>Tu cuenta ha sido registrada.</p>
 </div>
 </body>
 </html>

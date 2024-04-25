@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\GameFinished;
-use App\Events\GameShipLocation;
+use App\Events\AttackEvent;
+use App\Events\AttackFailedEvent;
+use App\Events\AttackSuccessEvent;
+use App\Events\TestEvent;
+use App\Events\NotifyEvent;
+use App\Events\AlertWinner;
+use App\Events\AlertEvent;
 use App\Models\Game;
-use App\Models\User;
 use Illuminate\Http\Request;
-use App\Events\GameEvent;
-use App\Events\GamePlayerDestroyShip;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -18,130 +20,45 @@ use PHPUnit\Util\Test;
 
 class GameController extends Controller
 {
-    public function getWinsUser($id){
-        $user = User::find($id);
-        $gameswins = Game::where('status', 'finished')
-        ->where(function ($query) use ($user) {
-            $query->where('winner_id', $user->id)
-                ->where(function ($query) use ($user) {
-                    $query->where('player1_id', $user->id)
-                        ->orWhere('player2_id', $user->id);
-                });
-        })
-        ->with(['player1', 'player2'])
-        ->get();
 
-        return response()->json($gameswins);
-    }
-    
-    public function getLosesUser($id){
-        $user = User::find($id);
-        $gameslose = Game::where('status', 'finished')
-        ->where(function ($query) use ($user) {
-            $query->where('loser_id', $user->id)
-                ->where(function ($query) use ($user) {
-                    $query->where('player1_id', $user->id)
-                        ->orWhere('player2_id', $user->id);
-                });
-        })
-        ->with(['player1', 'player2'])
-        ->get();
 
-        return response()->json($gameslose);
-    }
-    public function getGamesInfo($id = null){
-        $user = auth()->user();
-        $games = Game::where('status', 'finished')
-        ->where(function ($query) use ($user) {
-                $query->where('player1_id', $user->id)
-                    ->orWhere('player2_id', $user->id);
-        })
-        ->with(['player1', 'player2'])
-        ->get();
+    function sendNotify(Request $request){
+        $player_id = Auth::user()->id;
 
-        return response()->json(['games'=> $games]);
+        event(new AlertEvent("Se destruyo un barco rival!", $player_id));
+        return response()->json([
+            'msg' => 'Notification sent successfully',
+        ]);
     }
 
+    public function queueGame(){
+        $player_id = Auth::user()->id;
 
-    public function getWinsCountUser($id = null){
-        $user = auth()->user();
-        $countwins = Game::where('status', 'finished')
-        ->where(function ($query) use ($user) {
-            $query->where('winner_id', $user->id)
-                ->where(function ($query) use ($user) {
-                    $query->where('player1_id', $user->id)
-                        ->orWhere('player2_id', $user->id);
-                });
-        })
-        ->count();
-
-        return response()->json(['wins'=> $countwins]);
-    }
-
-    public function getLosesCountUser($id= null){
-        $user = auth()->user();
-        $countlose = Game::where('status', 'finished')
-        ->where(function ($query) use ($user) {
-            $query->where('loser_id', $user->id)
-                ->where(function ($query) use ($user) {
-                    $query->where('player1_id', $user->id)
-                        ->orWhere('player2_id', $user->id);
-                });
-        })
-        ->count();
-
-        return response()->json(['loses'=>$countlose]);
-    }
-    
-    public function createGame(){
-        $player1_id = Auth::user()->id;
-
-        $existingGame = Game::where('player1_id', $player1_id)
+        $existingGameAsP1 = game::where('player1_id', $player_id)
             ->whereIn('status', ['playing', 'queue'])
             ->first();
 
-        if ($existingGame) {
+        $existingGameAsP2 = game::where('player2_id', $player_id)
+            ->whereIn('status', ['playing', 'queue'])
+            ->first();
+
+        if ($existingGameAsP1 || $existingGameAsP2) {
             return response()->json([
                 'msg' => 'You already have a game in progress or in queue. Please finish it before starting a new one.',
             ], 400);
         }
 
         $game = new Game();
-        $game->player1_id = $player1_id;
+        $game->player1_id = $player_id;
         $game->save();
 
         return response()->json([
-            'msg' => 'Game created successfully',
+            'msg' => 'Game queued successfully',
             'gameId' => $game->id,
         ]);
     }
 
-    public function uncreateGame(Request $request){
-        $validator = Validator::make($request->all(), [
-            'gameId' => 'required|integer|exists:games,id',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(["errors" => $validator->errors()], 400);
-        }
-
-        $gameId = $request->gameId;
-
-        $game = Game::find($gameId);
-        if ($game->status != 'queue'){
-            return response()->json([
-                'msg' => 'Game is not in queue',
-            ], 400);
-        }
-        $game->delete();
-
-        return response()->json([
-            'msg' => 'Game uncreated successfully',
-            'game_id' => $game->id,
-        ]);
-    }
-
-    public function cancelfindGame(Request $request){
+    public function cancelRandomQueue(Request $request){
         $player_id = Auth::user()->id;
 
         Cache::put($player_id, 'cancelled', 1);
@@ -151,14 +68,14 @@ class GameController extends Controller
         ], 200);
     }
 
-    public function findGame(Request $request){
+    public function joinRandomGame(Request $request){
         $player2_id = Auth::user()->id;
 
-        $existingGameAsPlayerOne = Game::where('player1_id', $player2_id)
+        $existingGameAsPlayerOne = game::where('player1_id', $player2_id)
             ->whereIn('status', ['playing', 'queue'])
             ->first();
 
-        $existingGameAsPlayerTwo = Game::where('player2_id', $player2_id)
+        $existingGameAsPlayerTwo = game::where('player2_id', $player2_id)
             ->whereIn('status', ['playing', 'queue'])
             ->first();
 
@@ -168,7 +85,7 @@ class GameController extends Controller
             ], 400);
         }
 
-        $random_game = Game::where('status', 'queue')->first();
+        $random_game = game::where('status', 'queue')->first();
         if (!$random_game) {
             return response()->json([
                 'game_found' => false,
@@ -178,11 +95,10 @@ class GameController extends Controller
 
         $random_game->player2_id = $player2_id;
         $random_game->status = 'playing';
-        $random_game->ShipScreenPlayer = $player2_id;
         $random_game->save();
 
         try {
-            event(new GameEvent(['gameId' => $random_game->id, 'players' => [$random_game->player1_id, $random_game->player2_id]]));
+            event(new TestEvent(['gameId' => $random_game->id, 'players' => [$random_game->player1_id, $random_game->player2_id]]));
             Log::info('El evento TestEvent se ha enviado correctamente.');
         } catch (\Exception $e) {
             Log::error('Error al emitir el evento TestEvent: ' . $e->getMessage());
@@ -193,40 +109,36 @@ class GameController extends Controller
             'game_found' => true,
             'msg' => 'Game started successfully',
             'players' => [$random_game->player1_id, $random_game->player2_id],
-            'turn' => $random_game->player1_id,
+            'turn' => $random_game->player2_id,
             'gameId' => $random_game->id,
         ]);
     }
 
     public function endGame(Request $request){
         $validator = Validator::make($request->all(), [
-            'losser_id' => 'required|integer|exists:users,id',
+            'loser_id' => 'required|integer|exists:users,id',
             'gameId' => 'required|integer|exists:games,id',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(["errors" => $validator->errors()], 400);
+            return response()->json(["errors    " => $validator->errors()], 400);
         }
-
 
         $game_id = $request->gameId;
-        $losser_id = $request->losser_id;
+        $loser_id = $request->loser_id;
 
-        $game = Game::find($game_id);
-        
+        $game = game::find($game_id);
         $game->status = 'finished';
 
-        if ($game->player1_id == $losser_id) {
+        if ($game->player1_id == $loser_id) {
             $game->winner_id = $game->player2_id;
         }
-        else if ($game->player2_id == $losser_id) {
+        else if ($game->player2_id == $loser_id) {
             $game->winner_id = $game->player1_id;
         }
 
-
         $game->save();
-
-        event(new GameFinished($game));
+        event(new AlertWinner($game->winner_id));
 
         return response()->json([
             'msg' => 'Game ended successfully',
@@ -235,94 +147,156 @@ class GameController extends Controller
         ]);
     }
 
+    public function myGameHistory(Request $request){
+        $player_id = Auth::user()->id;
+        $perPage = 5;
 
-    public function updateLocation(Request $request) {
-        $game = Game::find($request->input('gameId'));
-        if ($game == null){
-            return response()->json(['success' => false, 'message' => 'Game not found'], 404);
-        }
-        $playerId = $request->input('player_id');  
-        $newLocation = $request->input('location');
-    
-        if ($game->ShipScreenPlayer == $playerId) {
-            if ($newLocation == 100) {
-                $game->ShipScreenPlayer = ($game->ShipScreenPlayer == $game->player1_id) ? $game->player2_id : $game->player1_id;
-                event(new GameShipLocation(['gameId' => $game->id, 'player_id' => $game->ShipScreenPlayer]));
-            }
-    
-            if ($playerId == $game->player1_id) {
-                $game->ShipLocationP1 = $newLocation;
-            } else {
-                $game->ShipLocationP2 = $newLocation;
-            }
-    
-            $game->attempsP2 = 0;
-            $game->attempsP1 = 0; 
+        $games = Game::where('player1_id', $player_id)
+            ->orWhere('player2_id', $player_id)
+            ->join('users as player1', 'games.player1_id', '=', 'player1.id')
+            ->join('users as player2', 'games.player2_id', '=', 'player2.id')
+            ->join('users as winner', 'games.winner_id', '=', 'winner.id')
+            ->select('games.id', 'games.status', 'games.created_at', 'player1.id as player1_id', 'player2.id as player2_id', 'winner.id as winner_id', 'player1.name as player1_name',  'player2.name as player2_name', 'winner.name as winner_name')
+            ->where('status', 'finished')
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
 
-            $game->save();
-            return response()->json(['success' => true]);
-        }
-    
-        return response()->json(['success' => false, 'message' => 'Not your turn']);
-    }
-    
-
-    public function registerAttempt(Request $request) {
-        $game = Game::find($request->input('gameId'));
-        if (!$game) {
-            return response()->json(['success' => false, 'message' => 'Game not found']);
-        }
-    
-        $playerId = $request->input('player_id');
-    
-        if ($game->ShipScreenPlayer != $playerId) {
-            return response()->json(['success' => false, 'message' => 'Not your turn']);
-        }
-    
-            if ($playerId == $game->player1_id) {
-                $game->increment('PlayerDestroyShip1');
-                $game->attempsP2 = 0;
-            } else {
-                $game->increment('PlayerDestroyShip2');
-                $game->attempsP1 = 0; 
-            }
-    
-            $game->ShipLocationP1 = 0;
-            $game->ShipLocationP2 = 0;
-
-            $game->increment('ShipDestroyed');
-            $game->ShipScreenPlayer = $game->player2_id;
-    
-
-            if ($game->ShipDestroyed >= 6) {
-                $game->status = 'finished';
-                $game->winner_id = ($game->PlayerDestroyShip1 > $game->PlayerDestroyShip2) ? $game->player1_id : $game->player2_id;
-                $game->loser_id = ($game->winner_id == $game->player1_id) ? $game->player2_id : $game->player1_id;
-            }
-    
-            $game->save();
-
-            if ($game->ShipDestroyed >= 6) {
-                event(new GameFinished($game));
-            }
-            event(new GamePlayerDestroyShip($game, $playerId));
-
-            return response()->json(['success' => true, 'message' => 'Ship destroyed and turns switched']);
-        
-    
-    }
-    
-
-
-    public function infoGame(Request $request) {
-        $game = Game::find($request->input('gameId'));
-        if ($game == null){
-            return response()->json(['success' => false, 'message' => 'Game not found'], 404);
+        foreach ($games as $game) {
+            $game->player_id = $player_id;
         }
 
-        return response()->json(['success' => true, 'game' => $game]);
+        return response()->json([
+            'page' =>$games->currentPage(),
+            'games' => $games->items(),
+        ]);
     }
 
 
 
+    public function dequeueGame(Request $request){
+        $validator = Validator::make($request->all(), [
+            'gameId' => 'required|integer|exists:games,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(["errors" => $validator->errors()], 400);
+        }
+
+        $gameId = $request->gameId;
+
+        $game = game::find($gameId);
+        if ($game->status != 'queue'){
+            return response()->json([
+                'msg' => 'Game is not in queue',
+            ], 400);
+        }
+        $game->delete();
+
+        return response()->json([
+            'msg' => 'Game unqueued successfully',
+            'game_id' => $game->id,
+        ]);
+    }
+
+    public function sendBoard(Request $request){
+        $validator = Validator::make($request->all(), [
+            'gameId' => 'required|integer|exists:games,id',
+            'board' => 'required|array',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(["errors" => $validator->errors()], 400);
+        }
+
+        $game = game::find($request->gameId);
+        if($game->status != 'playing'){
+            return response()->json([
+                'msg' => 'Game is not in progress',
+            ], 400);
+        }
+
+        $turn = $request->turn;
+        $newTurn = ($turn == 1) ? 2 : 1;
+
+        event(new NotifyEvent($newTurn, $request->board));
+    }
+
+    public function attack(Request  $request){
+        $validator = Validator::make($request->all(), [
+            'gameId' => 'required|integer|exists:games,id',
+            'playerAttacked' => 'required|integer|exists:users,id',
+            //'playerWhoAttacked' => 'required|integer|exists:users,id',
+            'cell' => 'required|array',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(["errors" => $validator->errors()], 400);
+        }
+
+        $playerWhoAttacked = Auth::user()->id;
+        //0                //1                 //2                   //3
+        event(new AttackEvent([$request->gameId, $request->cell, $request->playerAttacked, $playerWhoAttacked]));
+
+        return response()->json([
+            'msg' => 'Attack sent successfully',
+            'data' => [
+                'gameId' => $request->gameId,
+                'cell' => $request->cell,
+                'playerAttacked' => $request->playerAttacked,
+                'playerWhoAttacked' => $playerWhoAttacked,
+            ]
+        ]);
+    }
+
+    public function attackSuccess(Request $request){
+        $validator = Validator::make($request->all(), [
+            'hited' => 'required|boolean',
+            'turn' => 'required|integer|exists:users,id',
+            'cell' => 'required|array',
+            'playerWhoAttacked' => 'required|integer|exists:users,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(["errors" => $validator->errors()], 400);
+        }
+        //0                //1                 //2                   //3
+        event(new AttackSuccessEvent([$request->hited, $request->turn, $request->cell, $request->playerWhoAttacked]));
+
+        return response()->json([
+            'msg' => 'Attack success sent successfully',
+            'data' => [
+                'hited' => $request->hited,
+                'turn' => $request->turn,
+                'cell' => $request->cell,
+                'playerWhoAttacked' => $request->playerWhoAttacked,
+            ]
+        ]);
+
+    }
+
+    public function attackFailed(Request $request){
+        $validator = Validator::make($request->all(), [
+            'hited' => 'required|boolean',
+            'turn' => 'required|integer|exists:users,id',
+            'cell' => 'required|array',
+            'playerWhoAttacked' => 'required|integer|exists:users,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(["errors" => $validator->errors()], 400);
+        }
+        //0                //1                 //2                   //3
+        event(new AttackFailedEvent([$request->hited, $request->turn, $request->cell, $request->playerWhoAttacked]));
+
+        return response()->json([
+            'msg' => 'Attack failed sent successfully',
+            'data' => [
+                'hited' => $request->hited,
+                'turn' => $request->turn,
+                'cell' => $request->cell,
+                'playerWhoAttacked' => $request->playerWhoAttacked,
+            ]
+        ]);
+
+    }
 }
